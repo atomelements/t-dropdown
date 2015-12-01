@@ -11,7 +11,7 @@
             "data": {
                 "name": "Choices",
                 "type": "list",
-                "value": []
+                "value": ["First Choice","Second Choice","Third Choice"]
             }
         }
     }, {
