@@ -1,197 +1,294 @@
-<link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../paper-item/paper-item.html">
-<link rel="import" href="../paper-menu/paper-menu.html">
-<link rel="import" href="../t-shared-components/shared-styles.html" />
 <!--
-`t-dropdown` is a dropdown to select an item from a list of dropdown. The default text if you don't pass any level is "Select value from items"
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../t-input/t-input-container.html">
+<link rel="import" href="../paper-input/paper-input-error.html">
+<link rel="import" href="../iron-form-element-behavior/iron-form-element-behavior.html">
+<link rel="import" href="../paper-input/paper-input-behavior.html">
+<!--
+`t-dropdown-menu` is similar to a native browser select element.
+`t-dropdown-menu` works with selectable content. The currently selected-tem is displayed in the control. If no item is selected, the `label` is
+displayed instead.
 
-or you can pass the default in label
+There are 3 ways you can populate the dropdown.
+<h3>1. Passing Array of strings</h3>
 
-Example:
+By passing an array of strings in dropdown array. In that case the string will be set to both label and value of the option.
 
-    <t-dropdown label="Select one">
-          
-          <paper-tem>This is first</paper-item>
-          <paper-item>Second</paper-item>
-          <paper-item>Third</paper-item>
-          <paper-item>Fourth</paper-item>
+<h3>2. Passing Array of Objects</h3>
 
-        </t-dropdown>
+By passing an array of objects in dropdown array. You have to provide additional labelKey value in the dropdown. In that case the respective value of the key will be set to both label and value of the option. And you can also pass valueKey if its different from label. 
+
+<h3>3. Passing content as dropdown-item</h3>
+
+You can pass content in <dropdown-item></dropdown-item>
+
+          '<t-dropdown label="Dinosaurs" required >
+                <dropdown-item value="some">1 <span>22</span></dropdown-item>
+                <dropdown-item>2</dropdown-item>
+                <dropdown-item>3</dropdown-item>
+          </t-dropdown>'
+
+
+@demo demo/index.html
 -->
 <dom-module id="t-dropdown">
-
-    <link rel="import" type="css" href="dropdown.css">
     <template>
-    <style include="shared-styles"></style>
-        <label>{{label}}</label>
-        <div style="position:relative">
-            <a id="toggler" on-click="toggleHandler">{{selectedItemLabel}}</a>
-            <paper-menu selected="{{selectedIndex}}">
-                <content id="items" select="paper-item"></content>
-                <template is="dom-repeat" items="[[data]]" as="item">
-                    <paper-item>{{item}}</paper-item>
-                </template>
-            </paper-menu>
-            <p class="error">{{errorMessage}}</p>
-        </div>
-        <div id="layover" on-click="toggleHandler"></div>
+        <style>
+        :host {
+            display: block;
+            min-width: 100px;
+            width: 100%;
+            position: relative;
+            outline: 0;
+        }
+        select{
+            padding-right: 20px;
+        }
+        select::-ms-expand {
+            display: none;
+        }
+        .arrow{
+            content: '';
+            position: absolute;
+            right: 5px;
+            bottom: 10px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid var( --form-label-color, #777);
+            clear: both;
+        }
+        </style>
+        <t-input-container id="container" fire-blur="{{validateOnBlur}}" no-label-float="[[noLabelFloat]]" always-float-label="[[_computeAlwaysFloatLabel(alwaysFloatLabel,placeholder)]]" auto-validate$="[[autoValidate]]" disabled$="[[disabled]]" invalid="[[invalid]]">
+            <label hidden$="[[!label]]">[[label]]</label>
+            <div id="inner-content">
+                <select 
+                    id="input"
+                    class="paper-input-input" 
+                    on-focus="_boundOnFocus"
+                    on-blur="validate"
+                    on-change="_boundOnChange"
+                    disabled$="[[disabled]]"
+                    required$="[[required]]"
+                    value$="{{selectedItem}}">
+                </select>
+            </div>
+            <template is="dom-if" if="[[errorMessage]]">
+                <paper-input-error class="error">[[errorMessage]]</paper-input-error>
+            </template>
+        </t-input-container>
+    <div id="contentDiv" hidden>
+        <content id="content" select="*"></content>
+    </div>
+    <div class="arrow"></div>
     </template>
 </dom-module>
 <script>
-Polymer({
+(function() {
+    'use strict';
 
-    is: 't-dropdown',
+    Polymer({
+        is: 't-dropdown',
 
-    behaviors: [
-        Polymer.IronMenuBehavior,
-        Polymer.PaperInputBehavior
-    ],
+        behaviors: [
+          Polymer.PaperInputBehavior,
+          Polymer.IronFormElementBehavior
+        ],
 
-    properties: {
+        properties: {
 
-        /**
-         * Name property
-         */
-        name: {
-            type: String,
-            value: '',
-            reflectToAttribute: true
-        },
-
-        /**
-         * Json list based dropdown.
-         *
-         * @attribute checked
-         * @type boolean
-         * @default false
-         */
-        data: {
-            type: Array,
-            value: function() {
-                return [];
+            /**
+             * The Key of the object you want to set the value with!
+             */
+            valueKey: {
+                type: String,
+                value:''
             },
-            notify: true,
-            observer: '_dataChanged',
-            reflectToAttribute: true
+
+            /**
+             * The key of the object, you want to set the label of the options with.
+             */
+            labelKey: {
+                type: String,
+                value:''
+            },
+
+            /**
+             * The last selected item. An item is selected if the dropdown menu has
+             * a child with class `dropdown-content`, and that child triggers an
+             * `iron-select` event with the selected `item` in the `detail`.
+             */
+            selectedItem: {
+                type: String,
+                value:null,
+                notify: true,
+                observer:'_valueChanged'
+            },
+
+            /**
+             * The label for the dropdown.
+             */
+            label: {
+                type: String
+            },
+
+            /**
+             * True if the dropdown is opened. Otherwise, false.
+             */
+            opened: {
+                type: Boolean,
+                notify: true,
+                reflectToAttribute: true,
+                value: false
+            },
+
+            /**
+             * True if the dropdown is required. Otherwise, false.
+             */
+            required: {
+                type: Boolean,
+                notify: true,
+                reflectToAttribute: true,
+                value: false
+            },
+
+            /**
+             * errorMessage is to put the error msg
+             */
+            errorMessage: {
+                type: String,
+                reflectToAttribute: true,
+                value: 'Please select a value!'
+            },
+
+            /**
+             * Set to true to disable the floating label. Bind this to the
+             * `<paper-input-container>`'s `noLabelFloat` property.
+             */
+            noLabelFloat: {
+                type: Boolean,
+                value: false,
+                reflectToAttribute: true
+            },
+
+            /**
+             * Set to true to always float the label. Bind this to the
+             * `<paper-input-container>`'s `alwaysFloatLabel` property.
+             */
+            alwaysFloatLabel: {
+                type: Boolean,
+                value: false
+            },
+
+            /**
+             * Set the array to be itterated 
+             */
+            dropdownArray: {
+                type: Array,
+                notify:true,
+                value:function(){return [];},
+                observer: '_populateDropdown'
+            }
+
         },
 
-        label: {
-            type: String,
-            value: '',
-            notify: true,
-            reflectToAttribute: true
+        _populateDropdown: function(){
+            var dropdownArray = this.dropdownArray,
+            comp = this;
+            if(dropdownArray.length > 0){
+                var select = this.$.input;
+                    if(typeof dropdownArray[0] == 'string'){
+                        for(var x = 0 ; x < dropdownArray.length ; x++){
+                            select.options[x] = new Option(dropdownArray[x], dropdownArray[x]);
+                        }
+                    }else{
+                        if(!comp.valueKey || !comp.labelKey){
+                            console.error('Please mention the keys to bind for label and value of your array of objects!');
+                            return;
+                        }
+                        for(var x = 0 ; x < dropdownArray.length ; x++){
+                            select.options[x] = new Option(dropdownArray[x][comp.labelKey], dropdownArray[x][comp.valueKey]);
+                        }
+                    }
+            }else{
+                this._populateWithContent();
+            }
+            //debugger;
         },
 
-        toggle: {
-            type: Object,
-            reflectToAttribute: true
+        _populateWithContent: function(){
+            var select = this.$.input,
+            contentElements = this.contentElements;
+            if(contentElements.length <= 0){
+                console.error('Please Provide a dropdownArray or some list of <dropdown-item> inside dropdown!');
+                return;
+            }
+            for(var x = 0; x < contentElements.length; x++){
+                var value = contentElements[x].getAttribute('value') || contentElements[x].textContent;
+                select.options[x] = new Option(contentElements[x].textContent, value);
+            }
         },
-
         /**
-         * errorMessage is to put the error msg
+         * The content elements that is contained by the dropdown menu, if any.
          */
-        errorMessage: {
-            type: String,
-            reflectToAttribute: true,
-            value: 'Please select a value!'
+        get contentElements() {
+            return Polymer.dom(this.$.content).getDistributedNodes();
         },
 
-        required: {
-            type: Boolean,
-            reflectToAttribute:true,
-            value: false
+        _valueChanged: function(){
+            // NOTE(cdata): Due to timing, a preselected value in a `IronSelectable`
+            // child will cause an `iron-select` event to fire while the element is
+            // still in a `DocumentFragment`. This has the effect of causing
+            // handlers not to fire. So, we double check this value on attached:
+            var contentElement = this.$.input,
+                selectedItem = this.selectedItem,
+                component = this;
+            setTimeout(function() {
+                if (contentElement && selectedItem) {
+                    contentElement.value = selectedItem;
+                } else if (contentElement) {
+                    contentElement.value = null;
+                }
+                component._boundOnChange(contentElement);
+            }, 100);
         },
 
-        selectedIndex: {
-            type: Number,
-            value: -1,
-            notify: true,
-            observer: '_selectedIndexChanged'
+        _boundOnFocus: function(){
+            this.opened = true;
         },
 
-        /**
-         * No label float is to make the label either on the body or on the top.
-         */
-        noLabelFloat: {
-            type: Boolean,
-            reflectToAttribute: true,
-            value: false
+        _boundOnChange: function(target){
+            this.selectedItem = this.$.input.value;
+            this.$.container._handleValue(target);
         },
 
-        selectedItemLabel: {
-            type: String,
-            notify: true,
-            reflectToAttribute: true
+        //function to clear the value of the dropdown
+        clear: function(){
+            this.selectedItem = null;
+        },
+
+        //function to validate the select box and return boolean
+        validate: function() {
+            this.opened = false;
+
+            if (this.required && !this.hidden && !this.$.input.checkValidity()){
+                this.$.container.invalid = true;
+                this.$.container.classList.add('invalid-input');
+                return false;
+            }
+            this.$.container.invalid = false;
+            this.$.container.classList.remove('invalid-input');
+            return true;
         }
-
-
-    },
-
-    observers: [
-        '_checkLabel(noLabelFloat , label)'
-    ],
-
-   
-
-    _dataChanged: function() {
-        if (this.data.length > 0) {
-            Polymer.dom(this.$.items).getDistributedNodes().forEach(function(element) {
-                element.remove();
-            });
-        }
-    },
-
-
-    _activedChanged: function(actived) {
-        this.setAttribute('aria-actived', this.actived ? 'true' : 'false');
-        this.active = this.actived;
-    },
-
-    _selectedIndexChanged: function() {
-        if (this.selectedIndex >= 0) {
-            var selectedItem = this.data[this.selectedIndex];
-            this.selectedItemLabel = selectedItem || selectedItem.trim();
-            this.fire('dropdown-value-changed');
-            this.classList.add('label-is-floating');
-            this.toggleHandler();
-        }
-    },
-
-    _checkLabel: function() {
-        if (this.data.length > 0) {
-            var selectedItem = this.data[0];
-            this.selectedItemLabel = this.noLabelFloat ? this.label : selectedItem;
-        }
-    }, 
-    /*
-     *This is the function called by the iron menu behaviour.
-     */
-    select: function(index) {
-        this.selectedIndex = index;
-        this.toggleHandler();
-    },
-
-    /*
-     *This is the toggle function of the menu.
-     */
-    toggleHandler: function(toggle) {
-        if (this.required && this.toggle == 'active') {
-            this.validate();
-        }
-        this.toggle = (this.toggle != 'active' ? 'active' : "");
-        // results in this.setAttribute('toggle', 'loaded');
-
-    },
-
-    validate: function() {
-        if (this.required && this.selectedIndex < 0){
-            this.classList.add('no-value');
-            return false;
-        }
-        if ('.no-value') {
-            this.classList.remove('no-value');
-        }
-        return true;
-    }
-});
+    });
+})();
 </script>
