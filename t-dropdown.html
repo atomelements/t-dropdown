@@ -49,6 +49,9 @@ You can pass content in <dropdown-item></dropdown-item>
             position: relative;
             outline: 0;
         }
+        #inner-content{
+            width: 100%;
+        }
         select{
             padding-right: 20px;
         }
@@ -78,7 +81,6 @@ You can pass content in <dropdown-item></dropdown-item>
                     on-blur="validate"
                     on-change="_boundOnChange"
                     disabled$="[[disabled]]"
-                    required$="[[required]]"
                     value$="{{selectedItem}}">
                 </select>
             </div>
@@ -280,7 +282,7 @@ You can pass content in <dropdown-item></dropdown-item>
         validate: function() {
             this.opened = false;
 
-            if (this.required && !this.hidden && !this.$.input.checkValidity()){
+            if (this.required && !this.hidden && this.$.input.value == ''){
                 this.$.container.invalid = true;
                 this.$.container.classList.add('invalid-input');
                 return false;
