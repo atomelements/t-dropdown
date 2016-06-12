@@ -260,7 +260,7 @@ You can pass content in <dropdown-item></dropdown-item>
                 } else if (contentElement) {
                     contentElement.value = null;
                 }
-                component._boundOnChange(contentElement);
+                component.$.container._handleValue(contentElement);
             }, 100);
         },
 
