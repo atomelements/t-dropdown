@@ -214,7 +214,7 @@ You can pass content in <dropdown-item></dropdown-item>
                         }
                     }else{
                         if(!comp.valueKey || !comp.labelKey){
-                            console.error('Please mention the keys to bind for label and value of your array of objects!');
+                            console.warn('Please mention the keys to bind for label and value of your array of objects!');
                             return;
                         }
                         for(var x = 0 ; x < dropdownArray.length ; x++){
@@ -231,7 +231,7 @@ You can pass content in <dropdown-item></dropdown-item>
             var select = this.$.input,
             contentElements = this.contentElements;
             if(contentElements.length <= 0){
-                console.error('Please Provide a dropdownArray or some list of <dropdown-item> inside dropdown!');
+                console.warn('Please Provide a dropdownArray or some list of <dropdown-item> inside dropdown!');
                 return;
             }
             for(var x = 0; x < contentElements.length; x++){
