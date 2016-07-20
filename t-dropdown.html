@@ -140,7 +140,8 @@ You can pass content in <dropdown-item></dropdown-item>
              * The label for the dropdown.
              */
             label: {
-                type: String
+                type: String,
+                value: 'Dropdown'
             },
 
             /**
@@ -208,23 +209,29 @@ You can pass content in <dropdown-item></dropdown-item>
             comp = this;
             if(dropdownArray.length > 0){
                 var select = this.$.input;
+                this._setFirstOption(select);
                     if(typeof dropdownArray[0] == 'string'){
-                        for(var x = 0 ; x < dropdownArray.length ; x++){
-                            select.options[x] = new Option(dropdownArray[x], dropdownArray[x]);
+                        for(var x = 1 ; x < dropdownArray.length + 1 ; x++){
+                            select.options[x] = new Option(dropdownArray[x - 1], dropdownArray[x - 1]);
                         }
                     }else{
                         if(!comp.valueKey || !comp.labelKey){
                             console.warn('Please mention the keys to bind for label and value of your array of objects!');
                             return;
                         }
-                        for(var x = 0 ; x < dropdownArray.length ; x++){
-                            select.options[x] = new Option(dropdownArray[x][comp.labelKey], dropdownArray[x][comp.valueKey]);
+                        for(var x = 1 ; x < dropdownArray.length + 1 ; x++){
+                            select.options[x] = new Option(dropdownArray[x - 1][comp.labelKey], dropdownArray[x - 1][comp.valueKey]);
                         }
                     }
             }else{
                 this._populateWithContent();
             }
             //debugger;
+        },
+
+        _setFirstOption: function(select){
+            select.options[0] = new Option('Select ' + this.label);
+            select.options[0].disabled = true;
         },
 
         _populateWithContent: function(){
@@ -234,9 +241,10 @@ You can pass content in <dropdown-item></dropdown-item>
                 console.warn('Please Provide a dropdownArray or some list of <dropdown-item> inside dropdown!');
                 return;
             }
-            for(var x = 0; x < contentElements.length; x++){
-                var value = contentElements[x].getAttribute('value') || contentElements[x].textContent;
-                select.options[x] = new Option(contentElements[x].textContent, value);
+            this._setFirstOption(select);
+            for(var x = 1; x < contentElements.length + 1; x++){
+                var value = contentElements[x - 1].getAttribute('value') || contentElements[x - 1].textContent;
+                select.options[x] = new Option(contentElements[x - 1].textContent, value);
             }
         },
         /**
