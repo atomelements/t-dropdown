@@ -1,0 +1,234 @@
+<link rel="import" href="../../polymer/polymer.html">
+
+  <link rel="import" href="../t-dropdown.html">
+
+  <link rel="import" href="../../t-shared-components/theme.html">
+    <!-- <link rel="import" href="../../t-input/t-master-input.html"> -->
+
+<dom-module id="demo-element">
+  <template>
+   <style>
+
+    t-dropdown {
+      text-align: left;
+      margin: auto;
+      width: 180px;
+    }
+
+    t-dropdown.letters {
+      width: 90px;
+    }
+
+    paper-tabs {
+      width: 400px;
+    }
+
+    .horizontal-section {
+      display: inline-block;
+      
+    }
+  </style>
+
+   <div class="horizontal-section">
+      <div>
+        <h4>Array of strings Menu</h4>
+        <div class="horizontal-section">
+          <t-dropdown label="Dinosaurs" required selected-item="hadrosaurus" dropdown-array="[[dinosaurs]]">
+          </t-dropdown>
+        </div>
+      </div>
+    </div>
+    <div class="horizontal-section">
+      <div>
+        <h4>Array of objects Menu</h4>
+        <div class="horizontal-section">
+          <t-dropdown label="Dinosaurs" required dropdown-array="[[arrayOfObject]]" label-key="key1" value-key="key2">
+          </t-dropdown>
+        </div>
+      </div>
+    </div>
+    <div class="horizontal-section">
+      <div>
+        <h4>Content Menu</h4>
+        <div class="horizontal-section">
+          <t-dropdown label="Dinosaurs" required >
+              <dropdown-item value="some">1 <span>22</span></dropdown-item>
+              <dropdown-item>2</dropdown-item>
+              <dropdown-item>3</dropdown-item>
+          </t-dropdown>
+        </div>
+      </div>
+    </div>
+
+    <!-- <div class="horizontal-section">
+      <div>
+        <h4>Pre-selected Value1</h4>
+        <div class="horizontal-section">
+          <t-dropdown label="Dinosaurs" required>
+              <template is="dom-repeat" items="[[dinosaurs]]" as="dinosaur">
+                <option>[[dinosaur]]</option>
+              </template>
+          </t-dropdown>
+        </div>
+      </div>
+    </div>
+
+    <div class="horizontal-section">
+      <div>
+        <h4>Pre-selected Value2</h4>
+        <div class="horizontal-section">
+          <t-dropdown label="Dinosaurs" required>
+              <template is="dom-repeat" items="[[dinosaurs]]" as="dinosaur">
+                <option>[[dinosaur]]</option>
+              </template>
+          </t-dropdown>
+        </div>
+      </div>
+    </div>
+    <div class="horizontal-section">
+      <div>
+        <h4>Pre-selected Value3</h4>
+        <div class="horizontal-section">
+          <t-dropdown label="Dinosaurs" required>
+              <template is="dom-repeat" items="[[dinosaurs]]" as="dinosaur">
+                <option>[[dinosaur]]</option>
+              </template>
+          </t-dropdown>
+        </div>
+      </div>
+    </div>
+    <div class="horizontal-section">
+      <div>
+        <h4>Pre-selected Value4</h4>
+        <div class="horizontal-section">
+          <t-dropdown label="Dinosaurs" required>
+              <template is="dom-repeat" items="[[dinosaurs]]" as="dinosaur">
+                <option>[[dinosaur]]</option>
+              </template>
+          </t-dropdown>
+        </div>
+      </div>
+    </div>
+    <div class="horizontal-section">
+      <div>
+        <h4>Pre-selected Value5</h4>
+        <div class="horizontal-section">
+          <t-dropdown label="Dinosaurs" required>
+              <template is="dom-repeat" items="[[dinosaurs]]" as="dinosaur">
+                <option>[[dinosaur]]</option>
+              </template>
+          </t-dropdown>
+        </div>
+      </div>
+    </div>
+    <div class="horizontal-section">
+      <div>
+        <h4>Pre-selected Value6</h4>
+        <div class="horizontal-section">
+          <t-dropdown label="Dinosaurs" required>
+              <template is="dom-repeat" items="[[dinosaurs]]" as="dinosaur">
+                <option>[[dinosaur]]</option>
+              </template>
+          </t-dropdown>
+        </div>
+      </div>
+    </div>
+    <div class="horizontal-section">
+      <div>
+        <h4>No Ripple, No Animations</h4>
+        <div class="horizontal-section">
+          <t-dropdown label="Dinosaurs" noink no-animations>
+              <template is="dom-repeat" items="[[dinosaurs]]" as="dinosaur">
+                <option>[[dinosaur]]</option>
+              </template>
+          </t-dropdown>
+        </div>
+      </div>
+    </div>
+ -->
+    <!-- <t-master-input label="Dinosaurs" required error-message="sasasa"></t-master-input> -->
+  
+  </template>
+
+  <script>
+    class DemoElement extends Polymer.Element {
+      static get is() { return 'demo-element' }
+
+       static get properties(){
+            return {
+               dinosaurs: {
+                 type: Array,
+                 value: [
+                    'allosaurus',
+                    'brontosaurus',
+                    'carcharodontosaurus',
+                    'diplodocus',
+                    'ekrixinatosaurus',
+                    'fukuiraptor',
+                    'gallimimus',
+                    'hadrosaurus',
+                    'iguanodon',
+                    'jainosaurus',
+                    'kritosaurus',
+                    'liaoceratops',
+                    'megalosaurus',
+                    'nemegtosaurus',
+                    'ornithomimus',
+                    'protoceratops',
+                    'quetecsaurus',
+                    'rajasaurus',
+                    'stegosaurus',
+                    'triceratops',
+                    'utahraptor',
+                    'vulcanodon',
+                    'wannanosaurus',
+                    'xenoceratops',
+                    'yandusaurus',
+                    'zephyrosaurus'
+                  ]     
+               },
+                letters: {
+                 type: Array,
+                 value: [
+                    'allosaurus',
+                    'brontosaurus',
+                    'carcharodontosaurus',
+                    'diplodocus',
+                    'ekrixinatosaurus',
+                    'fukuiraptor',
+                    'gallimimus',
+                    'hadrosaurus',
+                    'iguanodon',
+                    'jainosaurus',
+                    'kritosaurus',
+                    'liaoceratops',
+                    'megalosaurus',
+                    'nemegtosaurus',
+                    'ornithomimus',
+                    'protoceratops',
+                    'quetecsaurus',
+                    'rajasaurus',
+                    'stegosaurus',
+                    'triceratops',
+                    'utahraptor',
+                    'vulcanodon',
+                    'wannanosaurus',
+                    'xenoceratops',
+                    'yandusaurus',
+                    'zephyrosaurus'
+                  ]     
+               },
+               arrayOfObject : {
+                  type: Array,
+                  value : [
+                    {'key1':'value1','key2':'value2'},{'key1':'value11','key2':'value22'},{'key1':'value111','key2':'value222'}
+                  ]
+              }
+            }
+        }
+    }
+
+   
+    customElements.define(DemoElement.is, DemoElement);
+  </script>
+</dom-module>
